@@ -7,7 +7,10 @@ package recovery;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,6 +31,22 @@ public class MultiClientHandler extends Thread
     
     public void run()
     {
+        String Received; 
+        String ToReturn;
+        
+        try 
+        {
+            Received = din.readUTF();
+            if(Received.equals("Start"))
+            {
+                System.out.println("Success");
+            }
+        
+        } 
+        catch (IOException ex) 
+        {
+            Logger.getLogger(MultiClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
 }

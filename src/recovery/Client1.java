@@ -55,5 +55,10 @@ public class Client1
         
     }
     
+    public static void main(String args[])
+    {
+        Client1 client = new Client1("127.0.0.1",2020); 
     
     }
+    
+}
