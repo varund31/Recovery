@@ -14,7 +14,7 @@ import java.net.Socket;
 
 /**
  *
- * @author Varundeep
+ * @author Varundeep and Vibhav
  */
 public class Client1 
 {
