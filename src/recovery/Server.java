@@ -51,6 +51,16 @@ public class Server
                     
                     String FileName = "Client_"+ ClientCounter + "_log.txt";
                     File NewFile = new File(FileName);
+                    boolean IsCreated = NewFile.createNewFile();
+                    
+                    if(IsCreated)
+                    {
+                        System.out.println("Successfully created new file, path:%s"+ NewFile.getCanonicalPath()); 
+                    }
+                    else
+                    {
+                        System.out.println("Some Error in Creation");
+                    }
                      
                     dout  = new DataOutputStream(socket.getOutputStream());  // to send data to the client
                     client_reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // to read data coming from the client 
@@ -58,7 +68,7 @@ public class Server
                     kboard_reader = new BufferedReader( new InputStreamReader(System.in)); 
                     
                     //System.out.println("Hello");
-                    Thread t = new MultiClientHandler( socket, din , dout );
+                    Thread t = new MultiClientHandler( socket, din , dout , ClientCounter , FileName );
                     t.start();
                 }
             }

@@ -21,12 +21,16 @@ public class MultiClientHandler extends Thread
     final DataInputStream din;
     final DataOutputStream dout; 
     final Socket socket; 
-    
-    MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout)
+    final int ClientNumber;
+    final String FileName;
+    MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
         this.din = din;
         this.dout = dout;
         this.socket = socket;
+        this.ClientNumber = ClientCounter;
+        this.FileName = FileName;
+        
     }
     
     public void run()
