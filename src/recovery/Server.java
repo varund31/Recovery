@@ -8,6 +8,7 @@ package recovery;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -31,8 +32,10 @@ public class Server
     private Server(int port) throws Exception
     {
         System.out.println("Hello, Server is Starting");
+        
         try
         {
+            int  ClientCounter = 0;
             server = new ServerSocket(port);
             System.out.println("Server Started");
             
@@ -41,10 +44,13 @@ public class Server
             {
                 while(true)
                 { 
+                    ClientCounter++;
                     socket = server.accept(); 
                     System.out.println("New Connection established");
-                    System.out.println("A new client is connected : " + socket.getInetAddress()); 
-
+                    System.out.println(" >> " + "Client No:" + ClientCounter + " at" + socket.getInetAddress());
+                    
+                    String FileName = "Client_"+ ClientCounter + "_log.txt";
+                    File NewFile = new File(FileName);
                      
                     dout  = new DataOutputStream(socket.getOutputStream());  // to send data to the client
                     client_reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // to read data coming from the client 
