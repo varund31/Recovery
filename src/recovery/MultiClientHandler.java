@@ -40,9 +40,10 @@ public class MultiClientHandler extends Thread
     {
         String Received; 
         String ToReturn;
-        
+        String TimeStamp = "";
         try 
         {
+            System.out.println(din);
             Received = din.readUTF();
             if(Received.equals("Start"))
             {
