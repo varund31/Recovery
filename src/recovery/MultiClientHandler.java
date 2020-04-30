@@ -26,7 +26,7 @@ public class MultiClientHandler extends Thread
     final Socket socket; 
     final int ClientNumber;
     final String FileName;
-    int ClientAmount;
+    int ClientMoney;
     
     MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
@@ -35,7 +35,12 @@ public class MultiClientHandler extends Thread
         this.socket = socket;
         this.ClientNumber = ClientCounter;
         this.FileName = FileName;
-        ClientAmount = 50000;
+        ClientMoney = 50000;
+    }
+    
+    public void AddLogEntry(String Timestamp , int flag , int Money , int TotalMoney)
+    {
+        
     }
     
     public void run()
@@ -55,26 +60,32 @@ public class MultiClientHandler extends Thread
                 {
                     dout.writeUTF("Enter Amount you want to Withdraw");
                     Received = din.readUTF();
-                    int received_amount = Integer.parseInt(Received);
+                    int WithdrawMoney = Integer.parseInt(Received);
                     
-                    if(received_amount > 0 && received_amount > ClientAmount)
+                    if( WithdrawMoney > 0 && WithdrawMoney > ClientMoney )
                     {
-                        dout.writeUTF("Client has Requested to Withdraw Money "+received_amount);
-                        ClientAmount -= received_amount;
-                        AddLogEntry(Timestamp , -1 , ClientAmount );
+                        dout.writeUTF("Client has Requested to Withdraw Money "+ WithdrawMoney);
+                        ClientMoney -= WithdrawMoney;
+                        AddLogEntry( Timestamp , -1 , WithdrawMoney ,ClientMoney );
                     }
                     else
                     {
-                        dout.writeUTF("YOu dont have Enough Amount"); 
+                        dout.writeUTF("You dont have Enough Amount"); 
                     }
                 }
                 else if(Received.equalsIgnoreCase("deposit"))
                 {
-                    
+                    dout.writeUTF("ENter the Amoutn you want to Deposit");
+                    Received = din.readUTF();
+                    int DepositMoney = Integer.parseInt(Received);
+                    dout.writeUTF("Client has Requested to Withdraw Money "+ DepositMoney );
+                    ClientMoney += DepositMoney;
+                    AddLogEntry( Timestamp , 1 , DepositMoney , ClientMoney );
                 }
-                else
+                else if(Received.equalsIgnoreCase("Log"))
                 {
                     //Log Option
+                    
                 }
                 /*FileReader inputFile = new FileReader("Client_1_log.txt");
                 try
