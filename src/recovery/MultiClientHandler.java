@@ -48,37 +48,23 @@ public class MultiClientHandler extends Thread
             if(Received.equals("Start"))
             {
                 System.out.println("Success");
+                /*FileReader inputFile = new FileReader("Client_1_log.txt");
                 try
                 {
-                    FileReader inputFile = new FileReader("Client_1_log.txt");
-                    try
-                    {
-                        Scanner parser = new Scanner(inputFile);
-                        while (parser.hasNextLine())
-                        {
-                                        String line = parser.nextLine();
-                                String[] att = line.split(",");
-                                    System.out.println(att[0]);
-                                        System.out.println(att[1]);
-                                        System.out.println(att[2]);
-
-                        }
-
-                    }
-                    finally
-                    {
-                        inputFile.close();
-                    }
-                }
-                catch(FileNotFoundException exception)
+                Scanner parser = new Scanner(inputFile);
+                while (parser.hasNextLine())
                 {
-                        System.out.println(" not found");
+                String line = parser.nextLine();
+                String[] att = line.split(",");
+                System.out.println(att[0]);
+                System.out.println(att[1]);
+                System.out.println(att[2]);
                 }
-                catch(IOException exception)
+                }
+                finally
                 {
-                        System.out.println("Unexpected I/O error occured.");
-                }
-            }
+                inputFile.close();
+                }*/            }
         } 
         catch (IOException ex) 
         {
