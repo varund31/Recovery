@@ -26,6 +26,7 @@ public class MultiClientHandler extends Thread
     final Socket socket; 
     final int ClientNumber;
     final String FileName;
+    int Client_Amount;
     MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
         this.din = din;
@@ -33,7 +34,7 @@ public class MultiClientHandler extends Thread
         this.socket = socket;
         this.ClientNumber = ClientCounter;
         this.FileName = FileName;
-        
+        Client_Amount = 50000;
     }
     
     public void run()
@@ -48,6 +49,20 @@ public class MultiClientHandler extends Thread
             if(Received.equals("Start"))
             {
                 System.out.println("Success");
+                Received = din.readUTF(); // Receive Option Chose by Client
+                if(Received.equalsIgnoreCase("withdraw"))
+                {
+                    dout.writeUTF("Enter Amount you want to Withdraw");
+                    Received = 
+                }
+                else if(Received.equalsIgnoreCase("deposit"))
+                {
+                    
+                }
+                else
+                {
+                    //Log Option
+                }
                 /*FileReader inputFile = new FileReader("Client_1_log.txt");
                 try
                 {
