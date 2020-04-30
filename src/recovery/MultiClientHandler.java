@@ -75,7 +75,7 @@ public class MultiClientHandler extends Thread
                 }
                 else if(Received.equalsIgnoreCase("deposit"))
                 {
-                    dout.writeUTF("ENter the Amoutn you want to Deposit");
+                    dout.writeUTF("Enter the Amoutn you want to Deposit");
                     Received = din.readUTF();
                     int DepositMoney = Integer.parseInt(Received);
                     dout.writeUTF("Client has Requested to Withdraw Money "+ DepositMoney );
