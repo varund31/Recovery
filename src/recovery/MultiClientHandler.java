@@ -26,7 +26,8 @@ public class MultiClientHandler extends Thread
     final Socket socket; 
     final int ClientNumber;
     final String FileName;
-    int Client_Amount;
+    int ClientAmount;
+    
     MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
         this.din = din;
@@ -34,7 +35,7 @@ public class MultiClientHandler extends Thread
         this.socket = socket;
         this.ClientNumber = ClientCounter;
         this.FileName = FileName;
-        Client_Amount = 50000;
+        ClientAmount = 50000;
     }
     
     public void run()
@@ -53,7 +54,19 @@ public class MultiClientHandler extends Thread
                 if(Received.equalsIgnoreCase("withdraw"))
                 {
                     dout.writeUTF("Enter Amount you want to Withdraw");
-                    Received = 
+                    Received = din.readUTF();
+                    int received_amount = Integer.parseInt(Received);
+                    
+                    if(received_amount > 0 && received_amount > ClientAmount)
+                    {
+                        dout.writeUTF("Client has Requested to Withdraw Money "+received_amount);
+                        ClientAmount -= received_amount;
+                        AddLogEntry(Timestamp , -1 , ClientAmount );
+                    }
+                    else
+                    {
+                        dout.writeUTF("YOu dont have Enough Amount"); 
+                    }
                 }
                 else if(Received.equalsIgnoreCase("deposit"))
                 {
