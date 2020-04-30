@@ -85,6 +85,24 @@ public class MultiClientHandler extends Thread
                 else if(Received.equalsIgnoreCase("Log"))
                 {
                     //Log Option
+                    dout.writeUTF("Sending Client Log File");
+                    LogFileTransferFunction();
+                    
+                    Received = din.readUTF(); // To Receive Log File back
+                    LogFileReceiveFunction();
+                    boolean CheckFile = CheckLogFile();
+                    
+                    if(CheckFile == true)
+                    {
+                        PutCheckPoint();
+                    }
+                    else
+                    {
+                        //Recover all operations from log file, 
+                        //having Timestamp greater than last checkpoint
+                        AlertOtherFunction();
+                    }
+                    
                     
                 }
                 /*FileReader inputFile = new FileReader("Client_1_log.txt");
