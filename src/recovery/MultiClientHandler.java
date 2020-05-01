@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -31,6 +34,8 @@ public class MultiClientHandler extends Thread
     final int ClientNumber;
     final String FileName;
     int ClientMoney;
+    BufferedReader kboard_reader;
+            
     
     MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
@@ -40,6 +45,27 @@ public class MultiClientHandler extends Thread
         this.ClientNumber = ClientCounter;
         this.FileName = FileName;
         ClientMoney = 50000;
+        this.kboard_reader = new BufferedReader(new InputStreamReader(System.in));
+            
+    }
+    
+    public void SendLogFile(String filename) throws FileNotFoundException, IOException
+    {
+        FileInputStream fr = new FileInputStream(filename);
+        byte []b = new byte[2002];
+        fr.read(b, 0 , b.length);
+        OutputStream os = this.socket.getOutputStream();
+        os.write(b, 0 , b.length);
+         
+    }
+
+    public void ReceiveLogFile(String filename) throws IOException
+    {
+        byte [] b = new byte[2002];
+        InputStream is = this.socket.getInputStream();
+        FileOutputStream fr = new FileOutputStream(filename);
+        is.read(b, 0, b.length);
+        fr.write(b, 0 ,b.length);
     }
     
     public boolean FileCompare(String file1, String file2) throws FileNotFoundException, IOException
@@ -101,16 +127,19 @@ public class MultiClientHandler extends Thread
     
     public void SendFile(String file) throws IOException 
     {
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 		FileInputStream fis = new FileInputStream(file);
 		byte[] buffer = new byte[4096];
 		
 		while (fis.read(buffer) > 0) 
                 {
-			dout.write(buffer);
+			dos.write(buffer);
 		}
 		
 		fis.close();
-		dout.close();	
+                System.out.println("End");
+                //return;
+		dos.close();	
     }
     
     
@@ -193,11 +222,27 @@ public class MultiClientHandler extends Thread
                     //Log Option
                     System.out.println("Sending Client Log File");
                     
-                    SendFile("Client_1_log.txt"); //LogFileTransferFunction();
+                    //SendFile("Client_1_log.txt"); //LogFileTransferFunction();
+                    //SendLogFile("Client_1_log.txt");
                     
-                    //Received = din.readUTF(); // To Receive Log File back //s7
+                    //DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                    FileInputStream fis = new FileInputStream("Client_1_log.txt");
+                    byte[] buffer = new byte[4096];
+
+                    while (fis.read(buffer) > 0) 
+                    {
+                            dout.write(buffer);
+                    }
+
+                    fis.close();
+                    System.out.println("Wirte Here");
+                    String temp = kboard_reader.readLine();
+                    dout.writeUTF(temp);
+                    System.out.println(temp);
+                    Received = din.readUTF(); // To Receive Log File back //s7
                     if(Received.equalsIgnoreCase("over"))
                     {
+                        //ReceiveLogFile("NewFile.txt");
                         SaveFile(socket);//LogFileReceiveFunction();
                         boolean CheckFile = FileCompare("receivedfile.txt" , "Client_1_log.txt");
                     

@@ -9,9 +9,12 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -49,6 +52,27 @@ public class Client1
         }
     }
     
+       public void SendLogFile(String filename) throws FileNotFoundException, IOException
+    {
+        FileInputStream fr = new FileInputStream(filename);
+        byte []b = new byte[2002];
+        fr.read(b, 0 , b.length);
+        OutputStream os = this.socket.getOutputStream();
+        os.write(b, 0 , b.length);
+         
+    }
+
+    public void ReceiveLogFile(String filename) throws IOException
+    {
+        byte [] b = new byte[2002];
+        InputStream is = this.socket.getInputStream();
+        FileOutputStream fr = new FileOutputStream(filename);
+        is.read(b, 0, b.length);
+        fr.write(b, 0 ,b.length);
+    }
+    
+    
+    
     public void SendFile(String file) throws IOException 
     {
 		FileInputStream fis = new FileInputStream(file);
@@ -60,7 +84,8 @@ public class Client1
 		}
 		
 		fis.close();
-		dout.close();	
+                return;
+		//dout.close();	
     }
     
       private void SaveFile(Socket clientSock) throws IOException 
@@ -82,7 +107,8 @@ public class Client1
         }
 
         fos.close();
-        dis.close();
+        return;
+        //dis.close();
     }
     
     
@@ -97,10 +123,31 @@ public class Client1
         
         if(toSend.equalsIgnoreCase("3"))
         {
-            SaveFile(socket);
-            System.out.println("Type 'over' to return th log file back to Server");
+            //ReceiveLogFile("testfile.txt");
+            //SaveFile(socket);
+             
+            
+            FileOutputStream fos = new FileOutputStream("testfile.txt");
+            byte[] buffer = new byte[4096];
+
+            int filesize = 15123; // Send file size in separate msg
+            int read = 0;
+            int totalRead = 0;
+            int remaining = filesize;
+            while((read = din.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) 
+            {
+                    totalRead += read;
+                    remaining -= read;
+                    System.out.println("read " + totalRead + " bytes.");
+                    fos.write(buffer, 0, read);
+            }
+            
+            
+            System.out.println("Type 'over' to return the log file back to Server");
             toSend = kboard_reader.readLine();
             dout.writeUTF(toSend); //c7
+            SendFile("testfile.txt");
+            //SendLogFile("testfile.txt");
         }
         else if(toSend.equalsIgnoreCase("1") || toSend.equalsIgnoreCase("2"))
         {
