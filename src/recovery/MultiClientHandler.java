@@ -104,7 +104,7 @@ public class MultiClientHandler extends Thread
                     String TimeStamp = ts.toString();
                     AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
                 }
-                /*else if(Received.equalsIgnoreCase("3"))
+                else if( rc == 3 )
                 {
                     
                     //Log Option
