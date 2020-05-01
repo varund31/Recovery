@@ -39,7 +39,7 @@ public class MultiClientHandler extends Thread
         ClientMoney = 50000;
     }
     
-    public void AddLogEntry(String Timestamp , int flag , int Money , int TotalMoney)
+    public void AddLogEntry(String Timestamp , String flag , int Money , int TotalMoney)
     {
         try
         {
@@ -57,6 +57,7 @@ public class MultiClientHandler extends Thread
     {
         String Received; 
         String ToReturn;
+        int rc;
         //String TimeStamp = "";
         try 
         {
@@ -70,20 +71,21 @@ public class MultiClientHandler extends Thread
                 //Received = din.readUTF();
             
                 System.out.println("Success");
-                Received = din.readUTF(); // Receive Option Chose by Client //s3
-                if(Received.equalsIgnoreCase("1"))
+                rc =Integer.parseInt( din.readUTF() ); // Receive Option Chose by Client //s3
+                System.out.println(rc);
+                if(rc == 1)
                 {
                     dout.writeUTF("Enter Amount you want to Withdraw"); //s4
                     Received = din.readUTF(); //s5
                     int WithdrawMoney = Integer.parseInt(Received);
-                    
-                    if( WithdrawMoney > 0 && WithdrawMoney > ClientMoney )
+                    System.out.println(ClientMoney);
+                    if( WithdrawMoney > 0 && WithdrawMoney <= ClientMoney )
                     {
                         ClientMoney -= WithdrawMoney;
                         dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         String TimeStamp = ts.toString();
-                        AddLogEntry( TimeStamp , -1 , WithdrawMoney ,ClientMoney );
+                        AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
                         
                     }
                     else
@@ -91,7 +93,7 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("You dont have Enough Amount");  //s6
                     }
                 }
-                else if(Received.equalsIgnoreCase("2"))
+                else if(rc == 2)
                 {
                     dout.writeUTF("Enter the Amoutn you want to Deposit"); //s4
                     Received = din.readUTF(); //s5
@@ -100,7 +102,7 @@ public class MultiClientHandler extends Thread
                     dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
                     Timestamp ts = new Timestamp(System.currentTimeMillis());
                     String TimeStamp = ts.toString();
-                    AddLogEntry( TimeStamp , 1 , DepositMoney , ClientMoney );
+                    AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
                 }
                 /*else if(Received.equalsIgnoreCase("3"))
                 {
