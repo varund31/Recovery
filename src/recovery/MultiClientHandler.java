@@ -5,9 +5,12 @@
  */
 package recovery;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,6 +42,49 @@ public class MultiClientHandler extends Thread
         ClientMoney = 50000;
     }
     
+    public boolean FileCompare(String file1, String file2) throws FileNotFoundException, IOException
+    {
+        BufferedReader reader1 = new BufferedReader(new FileReader(file1));
+        BufferedReader reader2 = new BufferedReader(new FileReader(file2));
+        String line1 = reader1.readLine();
+        String line2 = reader2.readLine();
+        boolean areEqual = true;
+        int lineNum = 1;
+        while (line1 != null || line2 != null)
+        {
+            if(line1 == null || line2 == null)
+            {
+                areEqual = false;
+                break;
+            }
+            else if(! line1.equalsIgnoreCase(line2))
+            {
+                areEqual = false;
+                break;
+            }
+            line1 = reader1.readLine();
+            line2 = reader2.readLine();
+            lineNum++;
+        }
+        if(areEqual)
+        {
+            System.out.println("Two files have same content.");
+            reader1.close();
+            reader2.close();
+            return true;
+        }
+        else
+        {
+            System.out.println("Two files have different content. They differ at line "+lineNum);
+            System.out.println("File1 has "+line1+" and File2 has "+line2+" at line "+lineNum);
+            reader1.close();
+            reader2.close();
+    
+            return false;
+        }
+
+    }
+    
     public void AddLogEntry(String Timestamp , String flag , int Money , int TotalMoney)
     {
         try
@@ -53,6 +99,43 @@ public class MultiClientHandler extends Thread
         }
     }
     
+    public void SendFile(String file) throws IOException 
+    {
+		FileInputStream fis = new FileInputStream(file);
+		byte[] buffer = new byte[4096];
+		
+		while (fis.read(buffer) > 0) 
+                {
+			dout.write(buffer);
+		}
+		
+		fis.close();
+		dout.close();	
+    }
+    
+    
+    private void SaveFile(Socket clientSock) throws IOException 
+    {
+        DataInputStream dis = new DataInputStream(clientSock.getInputStream());
+        FileOutputStream fos = new FileOutputStream("receivedfile.txt");
+        byte[] buffer = new byte[4096];
+
+        int filesize = 15123; // Send file size in separate msg
+        int read = 0;
+        int totalRead = 0;
+        int remaining = filesize;
+        while((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) 
+        {
+                totalRead += read;
+                remaining -= read;
+                System.out.println("read " + totalRead + " bytes.");
+                fos.write(buffer, 0, read);
+        }
+
+        fos.close();
+        dis.close();
+    }
+    
     public void run()
     {
         String Received; 
@@ -65,7 +148,7 @@ public class MultiClientHandler extends Thread
             Received = din.readUTF(); // s1
             
             
-            if(Received.equals("Start"))  
+            if(Received.equalsIgnoreCase("start"))  
             {
                 dout.writeUTF("1.Withdraw\n2.Deposit\n3.Send Log\n4.Exit\n");//s2
                 //Received = din.readUTF();
@@ -108,47 +191,37 @@ public class MultiClientHandler extends Thread
                 {
                     
                     //Log Option
-                    dout.writeUTF("Sending Client Log File");
-                    LogFileTransferFunction();
+                    System.out.println("Sending Client Log File");
                     
-                    Received = din.readUTF(); // To Receive Log File back
-                    LogFileReceiveFunction();
-                    boolean CheckFile = CheckLogFile();
+                    SendFile("Client_1_log.txt"); //LogFileTransferFunction();
                     
-                    if(CheckFile == true)
+                    //Received = din.readUTF(); // To Receive Log File back //s7
+                    if(Received.equalsIgnoreCase("over"))
                     {
-                        PutCheckPoint();
+                        SaveFile(socket);//LogFileReceiveFunction();
+                        boolean CheckFile = FileCompare("receivedfile.txt" , "Client_1_log.txt");
+                    
+                        if(CheckFile == true)
+                        {
+                            System.out.println("Putting Checkoint");
+                            //PutCheckPoint();
+                        }
+                        else
+                        {
+                            //Recover all operations from log file, 
+                            //having Timestamp greater than last checkpoint
+                            //AlertOtherFunction();
+                        }
                     }
-                    else
-                    {
-                        //Recover all operations from log file, 
-                        //having Timestamp greater than last checkpoint
-                        AlertOtherFunction();
-                    }
+                    
                     
                     
                 }
                 else
                 {
                     
-                }*/
-                /*FileReader inputFile = new FileReader("Client_1_log.txt");
-                try
-                {
-                Scanner parser = new Scanner(inputFile);
-                while (parser.hasNextLine())
-                {
-                String line = parser.nextLine();
-                String[] att = line.split(",");
-                System.out.println(att[0]);
-                System.out.println(att[1]);
-                System.out.println(att[2]);
                 }
-                }
-                finally
-                {
-                inputFile.close();
-                }*/         }
+             }
         } 
         catch (IOException ex) 
         {
