@@ -50,8 +50,9 @@ public class Client1
     private void ClientTask() throws IOException
     {
         toSend = kboard_reader.readLine();
-        dout.writeUTF(toSend);
+        dout.writeUTF(toSend); //c1
         System.out.println(din.readUTF());
+        din.readUTF();
         
     }
     

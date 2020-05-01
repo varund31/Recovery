@@ -51,7 +51,11 @@ public class MultiClientHandler extends Thread
         try 
         {
             System.out.println(din);
-            Received = din.readUTF();
+            Received = din.readUTF(); // s1
+            
+            dout.writeUTF("1.Withdraw\n2.Deposit\n3.Send Log\n4.Exit\n");//s2
+            
+            
             if(Received.equals("Start"))
             {
                 System.out.println("Success");
