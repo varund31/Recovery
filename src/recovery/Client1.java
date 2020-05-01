@@ -52,7 +52,26 @@ public class Client1
         toSend = kboard_reader.readLine();
         dout.writeUTF(toSend); //c1
         System.out.println(din.readUTF());
-        din.readUTF();
+        System.out.println(din.readUTF()); //c2
+        toSend = kboard_reader.readLine();
+        dout.writeUTF(toSend);  //c3
+        
+        if(toSend.equalsIgnoreCase("3"))
+        {
+            
+        }
+        else if(toSend.equalsIgnoreCase("1") || toSend.equalsIgnoreCase("2"))
+        {
+            System.out.println(din.readUTF()); //c4
+             
+            toSend = kboard_reader.readLine();
+            dout.writeUTF(toSend ); //c5
+            
+            System.out.println(din.readUTF()); //c6
+        }
+        
+        
+        
         
     }
     
