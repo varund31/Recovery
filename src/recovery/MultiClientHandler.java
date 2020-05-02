@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 
 /**
  *
- * @author Varundeep
+ * @author Varundeep and Vibhav
  */
 public class MultiClientHandler extends Thread
 {
