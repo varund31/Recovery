@@ -9,12 +9,16 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -57,6 +61,8 @@ public class MultiClientHandler extends Thread
     {
         String Received; 
         String ToReturn;
+        Timestamp prevTimestamp = new Timestamp(System.currentTimeMillis());
+        Timestamp ts1;
         int rc;
         
         try 
@@ -87,6 +93,7 @@ public class MultiClientHandler extends Thread
                             dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
                             Timestamp ts = new Timestamp(System.currentTimeMillis());
                             String TimeStamp = ts.toString();
+                            
                             util.AddLogEntry( FileName +".txt", TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
                         }
                         else
@@ -103,6 +110,7 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         String TimeStamp = ts.toString();
+                        
                         util.AddLogEntry(FileName+".txt" ,  TimeStamp , "Credit" , DepositMoney , ClientMoney );
                     }
                     else if( rc == 3 )
@@ -125,10 +133,13 @@ public class MultiClientHandler extends Thread
                             util.SaveFile(FileName+"-temp"+".txt", din , Integer.parseInt(Received));
 
                             boolean CheckFile = util.FileCompare(FileName+"-temp"+".txt" , FileName+".txt" );
-
+                            System.out.println("Before checkFile");
                             if(CheckFile == true)
                             {
                                 System.out.println("Putting Checkoint");
+                                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                                prevTimestamp = ts;
+                              
                                 //PutCheckPoint();
                             }
                             else
@@ -136,6 +147,35 @@ public class MultiClientHandler extends Thread
                                 //Recover all operations from log file, 
                                 //having Timestamp greater than last checkpoint
                                 //AlertOtherFunction();
+                                String fname= FileName+".txt";
+                                System.out.println(fname);
+                                //FileReader fr=
+                                System.out.println("File fr");
+                                BufferedReader br=new BufferedReader(new FileReader(fname));
+                                System.out.println("buffer br");
+                                String overrideFile = "";
+                                String currTimestamp = "dummy";
+                                System.out.println("enter do while");
+                                do
+                                {
+                                    System.out.println("checkpoint do while enter");
+                                    String logLine = br.readLine();
+                                    System.out.println("checkpoint do while 1");
+                                    overrideFile = overrideFile + logLine + "\n";
+                                    System.out.println("checkpoint do while 2");                                    
+                                    String[] logEntry= logLine.split("\\s");
+                                    System.out.println("checkpoint do while 3");
+                                    currTimestamp = logEntry[0];
+                                    System.out.println("checkpoint do while 4");
+                                    System.out.println("TimeStamp : "+currTimestamp);
+                                    ts1 = Timestamp.valueOf(currTimestamp);  
+                                    
+                                }while(prevTimestamp.compareTo(ts1) > 0);
+                                br.close();
+                               // fr.close();
+                                //FileWriter fw=new FileWriter(FileName+".txt");
+                                //fw.write(overrideFile);
+                                //fw.close();
                                 System.out.println("Error");
                             }
                             File f = new File(FileName+"-temp.txt");
