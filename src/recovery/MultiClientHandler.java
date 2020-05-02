@@ -158,24 +158,26 @@ public class MultiClientHandler extends Thread
                                 System.out.println("enter do while");
                                 do
                                 {
-                                    System.out.println("checkpoint do while enter");
+                                   // System.out.println("checkpoint do while enter");
                                     String logLine = br.readLine();
-                                    System.out.println("checkpoint do while 1");
+                                  //  System.out.println("checkpoint do while 1");
                                     overrideFile = overrideFile + logLine + "\n";
-                                    System.out.println("checkpoint do while 2");                                    
-                                    String[] logEntry= logLine.split("\\s");
-                                    System.out.println("checkpoint do while 3");
+                                  //  System.out.println("checkpoint do while 2");                                    
+                                    String[] logEntry= logLine.split("\\t");
+                                  //  System.out.println("checkpoint do while 3");
                                     currTimestamp = logEntry[0];
-                                    System.out.println("checkpoint do while 4");
-                                    System.out.println("TimeStamp : "+currTimestamp);
+                                   // System.out.println("checkpoint do while 4");
+                                    System.out.println(logEntry[0]+  " and " + logEntry[1]);
+                                  //  System.out.println("TimeStamp : "+currTimestamp);
                                     ts1 = Timestamp.valueOf(currTimestamp);  
+                                    System.out.println("override : " + overrideFile);
                                     
                                 }while(prevTimestamp.compareTo(ts1) > 0);
                                 br.close();
                                // fr.close();
-                                //FileWriter fw=new FileWriter(FileName+".txt");
-                                //fw.write(overrideFile);
-                                //fw.close();
+                                FileWriter fw=new FileWriter(FileName+".txt");
+                                fw.write(overrideFile);
+                                fw.close();
                                 System.out.println("Error");
                             }
                             File f = new File(FileName+"-temp.txt");
