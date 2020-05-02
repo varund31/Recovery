@@ -28,6 +28,7 @@ public class Client1
     
     String toSend , toReceive;
     Utilities util;
+    int ClientNumber;
     
     Client1(String address , int port)
     {
@@ -58,6 +59,9 @@ public class Client1
         toSend = kboard_reader.readLine();
         dout.writeUTF(toSend); //c1 Start
         //System.out.println(din.readUTF()); //
+        //String Menu = din.readUTF();
+        //ClientNumber = Integer.parseInt(din.readUTF());
+        //System.out.println("Success, You Are Client Nu");
         while(true)
         {
             System.out.println(din.readUTF()); //c2 Menu
@@ -68,7 +72,8 @@ public class Client1
             {
                 //ReceiveLogFile("testfile.txt");
                 String fsize = din.readUTF();
-                util.SaveFile("Test.txt" , din, Integer.parseInt(fsize));
+                String FileName = "c-Client_"+ClientNumber+"_Log.txt";
+                util.SaveFile(FileName , din, Integer.parseInt(fsize));
                 System.out.println("Type 'over' to return the log file back to Server");
 
                 toSend = kboard_reader.readLine();
@@ -76,10 +81,10 @@ public class Client1
 
                 //Sending File Size
                 System.out.println("Sending Server Log File");
-                File fsend = new File("test.txt");
+                File fsend = new File(FileName);
                 System.out.print(fsend.length());
                 dout.writeUTF(Long.toString(fsend.length()));
-                util.SendFile("test.txt", dout);
+                util.SendFile(FileName, dout);
 
 
                 //SendFile("testfile.txt");
@@ -101,7 +106,8 @@ public class Client1
             }
             else
             {
-                System.out.println("Wrong Choice");
+                System.out.println(din.readUTF());
+                dout.writeUTF(kboard_reader.readLine());
             }
         }
         

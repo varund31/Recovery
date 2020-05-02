@@ -39,7 +39,7 @@ public class MultiClientHandler extends Thread
         this.socket = socket;
         this.ClientNumber = ClientCounter;
         this.FileName = FileName;
-        ClientMoney = 50000;
+        ClientMoney = 50000+ 10*ClientNumber;
         this.kboard_reader = new BufferedReader(new InputStreamReader(System.in));
         util = new Utilities();
             
@@ -58,7 +58,7 @@ public class MultiClientHandler extends Thread
         String Received; 
         String ToReturn;
         int rc;
-        //String TimeStamp = "";
+        
         try 
         {
             System.out.println(din);
@@ -68,6 +68,7 @@ public class MultiClientHandler extends Thread
             {
                 while(true)
                 {    
+                    String FileName = "s-Client_"+ClientNumber+"_log";
                     dout.writeUTF(getMenu());//s2
                     //System.out.println("Success");
                     rc =Integer.parseInt( din.readUTF() ); // Receive Option Chose by Client //s3
@@ -86,7 +87,7 @@ public class MultiClientHandler extends Thread
                             dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
                             Timestamp ts = new Timestamp(System.currentTimeMillis());
                             String TimeStamp = ts.toString();
-                            util.AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
+                            util.AddLogEntry( FileName +".txt", TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
                         }
                         else
                         {
@@ -102,18 +103,18 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         String TimeStamp = ts.toString();
-                        util.AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
+                        util.AddLogEntry(FileName+".txt" ,  TimeStamp , "Credit" , DepositMoney , ClientMoney );
                     }
                     else if( rc == 3 )
                     {
 
                         //Log Option
                         System.out.println("Sending Client Log File");
-                        File fsend = new File("Client_1_log.txt");
+                        File fsend = new File(FileName+".txt");
                         System.out.print(fsend.length());
                         dout.writeUTF(Long.toString(fsend.length()));
                         //util.sendLogFile("serverFiles/"+username+"-server",dos);
-                        util.SendFile("Client_1_log.txt" , dout); //LogFileTransferFunction();
+                        util.SendFile(FileName+".txt", dout); //LogFileTransferFunction();
 
                         String received = din.readUTF();
                      
@@ -121,9 +122,9 @@ public class MultiClientHandler extends Thread
                         {
                             Received = din.readUTF(); // To Receive Log File back  // receivedfilesize
                             System.out.println("Received File Size"+Received);
-                            util.SaveFile("temp.txt", din , Integer.parseInt(Received));
+                            util.SaveFile(FileName+"-temp"+".txt", din , Integer.parseInt(Received));
 
-                            boolean CheckFile = util.FileCompare("temp.txt" , "Client_1_log.txt");
+                            boolean CheckFile = util.FileCompare(FileName+"-temp"+".txt" , FileName+".txt" );
 
                             if(CheckFile == true)
                             {
@@ -137,14 +138,24 @@ public class MultiClientHandler extends Thread
                                 //AlertOtherFunction();
                                 System.out.println("Error");
                             }
+                            File f = new File(FileName+"-temp.txt");
+                            f.delete();
                         }
                         System.out.println("End of Log Function");
                     }
-                    else
+                    else if(rc==4)
                     {
+                        System.out.println("Client Number"+ClientNumber + " has Exited");
                         this.din.close(); 
                         this.dout.close(); 
                         break;
+                    }
+                    else
+                    {
+                        dout.writeUTF("You have Entered wrong choice\nPress Any Key to Continue");
+                        Received = din.readUTF();
+                                
+                        
                     }
                 }
             }

@@ -49,7 +49,7 @@ public class Server
                     System.out.println("New Connection established");
                     System.out.println(" >> " + "Client No:" + ClientCounter + " at" + socket.getInetAddress());
                     
-                    String FileName = "Client_"+ ClientCounter + "_log.txt";
+                    String FileName = "s-Client_"+ ClientCounter + "_log.txt";
                     File NewFile = new File(FileName);
                     boolean IsCreated = NewFile.createNewFile();
                     

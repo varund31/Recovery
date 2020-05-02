@@ -24,26 +24,6 @@ import java.util.logging.Logger;
  */
 public class Utilities 
 {
-    /*
-    public void SendLogFile(String filename) throws FileNotFoundException, IOException
-    {
-        FileInputStream fr = new FileInputStream(filename);
-        byte []b = new byte[2002];
-        fr.read(b, 0 , b.length);
-        OutputStream os = this.socket.getOutputStream();
-        os.write(b, 0 , b.length);
-         
-    }
-
-    public void ReceiveLogFile(String filename) throws IOException
-    {
-        byte [] b = new byte[2002];
-        InputStream is = this.socket.getInputStream();
-        FileOutputStream fr = new FileOutputStream(filename);
-        is.read(b, 0, b.length);
-        fr.write(b, 0 ,b.length);
-    }
-    */
     public boolean FileCompare(String file1, String file2) throws FileNotFoundException, IOException
     {
         BufferedReader reader1 = new BufferedReader(new FileReader(file1));
@@ -87,11 +67,11 @@ public class Utilities
 
     }
     
-    public void AddLogEntry(String Timestamp , String flag , int Money , int TotalMoney)
+    public void AddLogEntry(String FileName , String Timestamp , String flag , int Money , int TotalMoney)
     {
         try
         {
-            FileWriter writer = new FileWriter("Client_1_log.txt",true);
+            FileWriter writer = new FileWriter(FileName,true);
             writer.write(Timestamp+"\t"+Money+"\t"+flag+"\t"+TotalMoney+"\n");
             writer.close();
         } 
@@ -100,25 +80,7 @@ public class Utilities
             Logger.getLogger(MultiClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    /*   public void SendLogFile(String filename) throws FileNotFoundException, IOException
-    {
-        FileInputStream fr = new FileInputStream(filename);
-        byte []b = new byte[2002];
-        fr.read(b, 0 , b.length);
-        OutputStream os = this.socket.getOutputStream();
-        os.write(b, 0 , b.length);
-         
-    }
-
-    public void ReceiveLogFile(String filename) throws IOException
-    {
-        byte [] b = new byte[2002];
-        InputStream is = this.socket.getInputStream();
-        FileOutputStream fr = new FileOutputStream(filename);
-        is.read(b, 0, b.length);
-        fr.write(b, 0 ,b.length);
-    }
-    */
+    
     public synchronized void SendFile(String file , DataOutputStream dos) throws IOException 
     {
                 
@@ -133,8 +95,7 @@ public class Utilities
 		
 		fis.close();
                 System.out.println("End");
-                //return;
-		//dos.close();	
+            
     }
     
     
