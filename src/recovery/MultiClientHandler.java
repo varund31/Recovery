@@ -45,6 +45,10 @@ public class MultiClientHandler extends Thread
             
     }
     
+    public String getMenu()
+    {
+        return "1.Withdraw\n2.Deposit\n3.Send Log\n4.Exit\n";
+    }
 
     
 
@@ -60,94 +64,91 @@ public class MultiClientHandler extends Thread
             System.out.println(din);
             Received = din.readUTF(); // s1
             
-            
             if(Received.equalsIgnoreCase("start"))  
             {
-                dout.writeUTF("1.Withdraw\n2.Deposit\n3.Send Log\n4.Exit\n");//s2
-                //Received = din.readUTF();
-            
-                System.out.println("Success");
-                rc =Integer.parseInt( din.readUTF() ); // Receive Option Chose by Client //s3
-                System.out.println(rc);
-                if(rc == 1)
-                {
-                    dout.writeUTF("Enter Amount you want to Withdraw"); //s4
-                    Received = din.readUTF(); //s5
-                    int WithdrawMoney = Integer.parseInt(Received);
-                    System.out.println(ClientMoney);
-                    if( WithdrawMoney > 0 && WithdrawMoney <= ClientMoney )
+                while(true)
+                {    
+                    dout.writeUTF(getMenu());//s2
+                    //System.out.println("Success");
+                    rc =Integer.parseInt( din.readUTF() ); // Receive Option Chose by Client //s3
+                    System.out.println(rc);
+                    
+                    if(rc == 1)
                     {
-                        ClientMoney -= WithdrawMoney;
-                        dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
-                        Timestamp ts = new Timestamp(System.currentTimeMillis());
-                        String TimeStamp = ts.toString();
-                        util.AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
+                        dout.writeUTF("Enter Amount you want to Withdraw"); //s4
+                        Received = din.readUTF(); //s5
+                        int WithdrawMoney = Integer.parseInt(Received);
+                        //System.out.println(ClientMoney);
                         
-                    }
-                    else
-                    {
-                        dout.writeUTF("You dont have Enough Amount");  //s6
-                    }
-                }
-                else if(rc == 2)
-                {
-                    dout.writeUTF("Enter the Amoutn you want to Deposit"); //s4
-                    Received = din.readUTF(); //s5
-                    int DepositMoney = Integer.parseInt(Received);
-                    ClientMoney += DepositMoney;
-                    dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
-                    Timestamp ts = new Timestamp(System.currentTimeMillis());
-                    String TimeStamp = ts.toString();
-                    util.AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
-                }
-                else if( rc == 3 )
-                {
-                    
-                    //Log Option
-                    System.out.println("Sending Client Log File");
-                    File fsend = new File("Client_1_log.txt");
-                    System.out.print(fsend.length());
-                    dout.writeUTF(Long.toString(fsend.length()));
-                    //util.sendLogFile("serverFiles/"+username+"-server",dos);
-                    util.SendFile("Client_1_log.txt" , dout); //LogFileTransferFunction();
-                    
-                    String received = din.readUTF();
-                    //System.out.print(received);
-                    
-                    //System.out.println("Wirte Here");
-                    //String temp = kboard_reader.readLine();
-                    //dout.writeUTF(temp);
-                    //System.out.println(temp);
-                    if(received.equalsIgnoreCase("over"))
-                    {
-                        Received = din.readUTF(); // To Receive Log File back  // receivedfilesize
-                        System.out.println("Received File Size"+Received);
-                        util.SaveFile("temp.txt", din , Integer.parseInt(Received));
-                    
-                        boolean CheckFile = util.FileCompare("temp.txt" , "Client_1_log.txt");
-                    
-                        if(CheckFile == true)
+                        if( WithdrawMoney > 0 && WithdrawMoney <= ClientMoney )
                         {
-                            System.out.println("Putting Checkoint");
-                            //PutCheckPoint();
+                            ClientMoney -= WithdrawMoney;
+                            dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
+                            Timestamp ts = new Timestamp(System.currentTimeMillis());
+                            String TimeStamp = ts.toString();
+                            util.AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
                         }
                         else
                         {
-                            //Recover all operations from log file, 
-                            //having Timestamp greater than last checkpoint
-                            //AlertOtherFunction();
-                            System.out.println("Error");
+                            dout.writeUTF("You dont have Enough Amount");  //s6
                         }
                     }
-                    
-                    
-                    
+                    else if(rc == 2)
+                    {
+                        dout.writeUTF("Enter the Amount you want to Deposit"); //s4
+                        Received = din.readUTF(); //s5
+                        int DepositMoney = Integer.parseInt(Received);
+                        ClientMoney += DepositMoney;
+                        dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
+                        Timestamp ts = new Timestamp(System.currentTimeMillis());
+                        String TimeStamp = ts.toString();
+                        util.AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
+                    }
+                    else if( rc == 3 )
+                    {
+
+                        //Log Option
+                        System.out.println("Sending Client Log File");
+                        File fsend = new File("Client_1_log.txt");
+                        System.out.print(fsend.length());
+                        dout.writeUTF(Long.toString(fsend.length()));
+                        //util.sendLogFile("serverFiles/"+username+"-server",dos);
+                        util.SendFile("Client_1_log.txt" , dout); //LogFileTransferFunction();
+
+                        String received = din.readUTF();
+                     
+                        if(received.equalsIgnoreCase("over"))
+                        {
+                            Received = din.readUTF(); // To Receive Log File back  // receivedfilesize
+                            System.out.println("Received File Size"+Received);
+                            util.SaveFile("temp.txt", din , Integer.parseInt(Received));
+
+                            boolean CheckFile = util.FileCompare("temp.txt" , "Client_1_log.txt");
+
+                            if(CheckFile == true)
+                            {
+                                System.out.println("Putting Checkoint");
+                                //PutCheckPoint();
+                            }
+                            else
+                            {
+                                //Recover all operations from log file, 
+                                //having Timestamp greater than last checkpoint
+                                //AlertOtherFunction();
+                                System.out.println("Error");
+                            }
+                        }
+                        System.out.println("End of Log Function");
+                    }
+                    else
+                    {
+                        this.din.close(); 
+                        this.dout.close(); 
+                        break;
+                    }
                 }
-                else
-                {
-                    
-                }
-             }
+            }
+            
         } 
         catch (IOException ex) 
         {

@@ -54,44 +54,56 @@ public class Client1
     
     private void ClientTask() throws IOException
     {
+        System.out.println("Enter 'Start'");
         toSend = kboard_reader.readLine();
         dout.writeUTF(toSend); //c1 Start
         //System.out.println(din.readUTF()); //
-        System.out.println(din.readUTF()); //c2
-        toSend = kboard_reader.readLine();
-        dout.writeUTF(toSend);  //c3
-        
-        if(toSend.equalsIgnoreCase("3"))
+        while(true)
         {
-            //ReceiveLogFile("testfile.txt");
-            String fsize = din.readUTF();
-            util.SaveFile("Test.txt" , din, Integer.parseInt(fsize));
-            System.out.println("Type 'over' to return the log file back to Server");
-            
+            System.out.println(din.readUTF()); //c2 Menu
             toSend = kboard_reader.readLine();
-            dout.writeUTF(toSend); //c7
-            
-            //Sending File Size
-            System.out.println("Sending Server Log File");
-            File fsend = new File("test.txt");
-            System.out.print(fsend.length());
-            dout.writeUTF(Long.toString(fsend.length()));
-            util.SendFile("test.txt", dout);
-            
-            
-            //SendFile("testfile.txt");
-            //SendLogFile("testfile.txt");
+            dout.writeUTF(toSend);  //c3
+
+            if(toSend.equalsIgnoreCase("3"))
+            {
+                //ReceiveLogFile("testfile.txt");
+                String fsize = din.readUTF();
+                util.SaveFile("Test.txt" , din, Integer.parseInt(fsize));
+                System.out.println("Type 'over' to return the log file back to Server");
+
+                toSend = kboard_reader.readLine();
+                dout.writeUTF(toSend); //c7
+
+                //Sending File Size
+                System.out.println("Sending Server Log File");
+                File fsend = new File("test.txt");
+                System.out.print(fsend.length());
+                dout.writeUTF(Long.toString(fsend.length()));
+                util.SendFile("test.txt", dout);
+
+
+                //SendFile("testfile.txt");
+                //SendLogFile("testfile.txt");
+            }
+            else if(toSend.equalsIgnoreCase("1") || toSend.equalsIgnoreCase("2"))
+            {
+                System.out.println(din.readUTF()); //c4
+
+                toSend = kboard_reader.readLine();
+                dout.writeUTF(toSend ); //c5
+
+                System.out.println(din.readUTF()); //c6
+            }
+            else if(toSend.equals("4"))
+            {
+                break;
+                
+            }
+            else
+            {
+                System.out.println("Wrong Choice");
+            }
         }
-        else if(toSend.equalsIgnoreCase("1") || toSend.equalsIgnoreCase("2"))
-        {
-            System.out.println(din.readUTF()); //c4
-             
-            toSend = kboard_reader.readLine();
-            dout.writeUTF(toSend ); //c5
-            
-            System.out.println(din.readUTF()); //c6
-        }
-        
         
         
         
