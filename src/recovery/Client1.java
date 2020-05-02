@@ -8,6 +8,7 @@ package recovery;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -32,6 +33,7 @@ public class Client1
     {
         try
         {
+            util = new Utilities();
             System.out.println("Client is Trying to Connect");
             socket = new Socket(address,port);
             System.out.println("Connected");
@@ -62,28 +64,21 @@ public class Client1
         if(toSend.equalsIgnoreCase("3"))
         {
             //ReceiveLogFile("testfile.txt");
-            util.SaveFile("Client_1_log.txt" , din, 4096);
-             
-            /*
-            FileOutputStream fos = new FileOutputStream("testfile.txt");
-            byte[] buffer = new byte[4096];
-
-            int filesize = 15123; // Send file size in separate msg
-            int read = 0;
-            int totalRead = 0;
-            int remaining = filesize;
-            while((read = din.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) 
-            {
-                    totalRead += read;
-                    remaining -= read;
-                    System.out.println("read " + totalRead + " bytes.");
-                    fos.write(buffer, 0, read);
-            }
-            
-            */
+            String fsize = din.readUTF();
+            util.SaveFile("Test.txt" , din, Integer.parseInt(fsize));
             System.out.println("Type 'over' to return the log file back to Server");
+            
             toSend = kboard_reader.readLine();
             dout.writeUTF(toSend); //c7
+            
+            //Sending File Size
+            System.out.println("Sending Server Log File");
+            File fsend = new File("test.txt");
+            System.out.print(fsend.length());
+            dout.writeUTF(Long.toString(fsend.length()));
+            util.SendFile("test.txt", dout);
+            
+            
             //SendFile("testfile.txt");
             //SendLogFile("testfile.txt");
         }

@@ -8,6 +8,7 @@ package recovery;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -40,6 +41,7 @@ public class MultiClientHandler extends Thread
         this.FileName = FileName;
         ClientMoney = 50000;
         this.kboard_reader = new BufferedReader(new InputStreamReader(System.in));
+        util = new Utilities();
             
     }
     
@@ -103,30 +105,26 @@ public class MultiClientHandler extends Thread
                     
                     //Log Option
                     System.out.println("Sending Client Log File");
-                    
+                    File fsend = new File("Client_1_log.txt");
+                    System.out.print(fsend.length());
+                    dout.writeUTF(Long.toString(fsend.length()));
+                    //util.sendLogFile("serverFiles/"+username+"-server",dos);
                     util.SendFile("Client_1_log.txt" , dout); //LogFileTransferFunction();
-                    //SendLogFile("Client_1_log.txt");
-                    /*
-                    //DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-                    FileInputStream fis = new FileInputStream("Client_1_log.txt");
-                    byte[] buffer = new byte[4096];
-
-                    while (fis.read(buffer) > 0) 
+                    
+                    String received = din.readUTF();
+                    //System.out.print(received);
+                    
+                    //System.out.println("Wirte Here");
+                    //String temp = kboard_reader.readLine();
+                    //dout.writeUTF(temp);
+                    //System.out.println(temp);
+                    if(received.equalsIgnoreCase("over"))
                     {
-                            dout.write(buffer);
-                    }
-
-                    fis.close();*/
-                    System.out.println("Wirte Here");
-                    String temp = kboard_reader.readLine();
-                    dout.writeUTF(temp);
-                    System.out.println(temp);
-                    Received = din.readUTF(); // To Receive Log File back //s7
-                    if(Received.equalsIgnoreCase("over"))
-                    {
-                        //ReceiveLogFile("NewFile.txt");
-                        //SaveFile(socket);//LogFileReceiveFunction();
-                        boolean CheckFile = util.FileCompare("receivedfile.txt" , "Client_1_log.txt");
+                        Received = din.readUTF(); // To Receive Log File back  // receivedfilesize
+                        System.out.println("Received File Size"+Received);
+                        util.SaveFile("temp.txt", din , Integer.parseInt(Received));
+                    
+                        boolean CheckFile = util.FileCompare("temp.txt" , "Client_1_log.txt");
                     
                         if(CheckFile == true)
                         {
@@ -138,6 +136,7 @@ public class MultiClientHandler extends Thread
                             //Recover all operations from log file, 
                             //having Timestamp greater than last checkpoint
                             //AlertOtherFunction();
+                            System.out.println("Error");
                         }
                     }
                     
