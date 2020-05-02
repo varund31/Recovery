@@ -8,20 +8,13 @@ package recovery;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Timestamp;
+
 /**
  *
  * @author Varundeep
@@ -35,7 +28,8 @@ public class MultiClientHandler extends Thread
     final String FileName;
     int ClientMoney;
     BufferedReader kboard_reader;
-            
+    Utilities util;
+    
     
     MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
     {
@@ -49,121 +43,9 @@ public class MultiClientHandler extends Thread
             
     }
     
-    public void SendLogFile(String filename) throws FileNotFoundException, IOException
-    {
-        FileInputStream fr = new FileInputStream(filename);
-        byte []b = new byte[2002];
-        fr.read(b, 0 , b.length);
-        OutputStream os = this.socket.getOutputStream();
-        os.write(b, 0 , b.length);
-         
-    }
 
-    public void ReceiveLogFile(String filename) throws IOException
-    {
-        byte [] b = new byte[2002];
-        InputStream is = this.socket.getInputStream();
-        FileOutputStream fr = new FileOutputStream(filename);
-        is.read(b, 0, b.length);
-        fr.write(b, 0 ,b.length);
-    }
     
-    public boolean FileCompare(String file1, String file2) throws FileNotFoundException, IOException
-    {
-        BufferedReader reader1 = new BufferedReader(new FileReader(file1));
-        BufferedReader reader2 = new BufferedReader(new FileReader(file2));
-        String line1 = reader1.readLine();
-        String line2 = reader2.readLine();
-        boolean areEqual = true;
-        int lineNum = 1;
-        while (line1 != null || line2 != null)
-        {
-            if(line1 == null || line2 == null)
-            {
-                areEqual = false;
-                break;
-            }
-            else if(! line1.equalsIgnoreCase(line2))
-            {
-                areEqual = false;
-                break;
-            }
-            line1 = reader1.readLine();
-            line2 = reader2.readLine();
-            lineNum++;
-        }
-        if(areEqual)
-        {
-            System.out.println("Two files have same content.");
-            reader1.close();
-            reader2.close();
-            return true;
-        }
-        else
-        {
-            System.out.println("Two files have different content. They differ at line "+lineNum);
-            System.out.println("File1 has "+line1+" and File2 has "+line2+" at line "+lineNum);
-            reader1.close();
-            reader2.close();
-    
-            return false;
-        }
 
-    }
-    
-    public void AddLogEntry(String Timestamp , String flag , int Money , int TotalMoney)
-    {
-        try
-        {
-            FileWriter writer = new FileWriter("Client_1_log.txt",true);
-            writer.write(Timestamp+"\t"+Money+"\t"+flag+"\t"+TotalMoney+"\n");
-            writer.close();
-        } 
-        catch (IOException ex) 
-        {
-            Logger.getLogger(MultiClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public void SendFile(String file) throws IOException 
-    {
-                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-		FileInputStream fis = new FileInputStream(file);
-		byte[] buffer = new byte[4096];
-		
-		while (fis.read(buffer) > 0) 
-                {
-			dos.write(buffer);
-		}
-		
-		fis.close();
-                System.out.println("End");
-                //return;
-		dos.close();	
-    }
-    
-    
-    private void SaveFile(Socket clientSock) throws IOException 
-    {
-        DataInputStream dis = new DataInputStream(clientSock.getInputStream());
-        FileOutputStream fos = new FileOutputStream("receivedfile.txt");
-        byte[] buffer = new byte[4096];
-
-        int filesize = 15123; // Send file size in separate msg
-        int read = 0;
-        int totalRead = 0;
-        int remaining = filesize;
-        while((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) 
-        {
-                totalRead += read;
-                remaining -= read;
-                System.out.println("read " + totalRead + " bytes.");
-                fos.write(buffer, 0, read);
-        }
-
-        fos.close();
-        dis.close();
-    }
     
     public void run()
     {
@@ -197,7 +79,7 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         String TimeStamp = ts.toString();
-                        AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
+                        util.AddLogEntry( TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
                         
                     }
                     else
@@ -214,7 +96,7 @@ public class MultiClientHandler extends Thread
                     dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
                     Timestamp ts = new Timestamp(System.currentTimeMillis());
                     String TimeStamp = ts.toString();
-                    AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
+                    util.AddLogEntry( TimeStamp , "Credit" , DepositMoney , ClientMoney );
                 }
                 else if( rc == 3 )
                 {
@@ -222,9 +104,9 @@ public class MultiClientHandler extends Thread
                     //Log Option
                     System.out.println("Sending Client Log File");
                     
-                    //SendFile("Client_1_log.txt"); //LogFileTransferFunction();
+                    util.SendFile("Client_1_log.txt" , dout); //LogFileTransferFunction();
                     //SendLogFile("Client_1_log.txt");
-                    
+                    /*
                     //DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                     FileInputStream fis = new FileInputStream("Client_1_log.txt");
                     byte[] buffer = new byte[4096];
@@ -234,7 +116,7 @@ public class MultiClientHandler extends Thread
                             dout.write(buffer);
                     }
 
-                    fis.close();
+                    fis.close();*/
                     System.out.println("Wirte Here");
                     String temp = kboard_reader.readLine();
                     dout.writeUTF(temp);
@@ -243,8 +125,8 @@ public class MultiClientHandler extends Thread
                     if(Received.equalsIgnoreCase("over"))
                     {
                         //ReceiveLogFile("NewFile.txt");
-                        SaveFile(socket);//LogFileReceiveFunction();
-                        boolean CheckFile = FileCompare("receivedfile.txt" , "Client_1_log.txt");
+                        //SaveFile(socket);//LogFileReceiveFunction();
+                        boolean CheckFile = util.FileCompare("receivedfile.txt" , "Client_1_log.txt");
                     
                         if(CheckFile == true)
                         {
