@@ -118,7 +118,7 @@ public class MultiClientHandler extends Thread
             
             if(true)  
             {
-                while(true)
+                while(!cd.isIsBlocked())
                 {    
                     FileName = "s-Client_"+ClientName+"_log";
                     dout.writeUTF(getMenu());//s2
@@ -187,6 +187,7 @@ public class MultiClientHandler extends Thread
                                 prevTimestamp = ts;
                                 checkpoint = true;
                                 //PutCheckPoint();
+                                dout.writeUTF("Log file verified\n");
                             }
                             else
                             {
@@ -248,6 +249,12 @@ public class MultiClientHandler extends Thread
                                          }
 
                                 } 
+                            
+                                dout.writeUTF("\nYOU ARE BLOCKED FROM PERFORMING ANY FURTHER TRANSACTIONS\n"); 
+                            this.din.close(); 
+                            this.dout.close();     
+                            
+                               
                             }
                             File f = new File(FileName+"-temp.txt");
                             f.delete();

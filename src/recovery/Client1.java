@@ -89,7 +89,7 @@ public class Client1
                 dout.writeUTF(Long.toString(fsend.length()));
                 util.SendFile(FileName, dout);
 
-
+                System.out.println(din.readUTF());
                 //SendFile("testfile.txt");
                 //SendLogFile("testfile.txt");
             }
