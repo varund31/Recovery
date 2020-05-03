@@ -83,7 +83,7 @@ public class MultiClientHandler extends Thread
         
         Timestamp ts1 = new Timestamp(System.currentTimeMillis());
         Timestamp prevTimestamp = new Timestamp(System.currentTimeMillis());
-        
+        boolean checkpoint = false;
         int rc;
         
         try 
@@ -185,7 +185,7 @@ public class MultiClientHandler extends Thread
                                 System.out.println("Putting Checkoint");
                                 Timestamp ts = new Timestamp(System.currentTimeMillis());
                                 prevTimestamp = ts;
-                              
+                                checkpoint = true;
                                 //PutCheckPoint();
                             }
                             else
@@ -198,37 +198,42 @@ public class MultiClientHandler extends Thread
                                 String fname= FileName+".txt";
                                 System.out.println(fname);
                                 //FileReader fr=
-                                System.out.println("File fr");
-                                BufferedReader br=new BufferedReader(new FileReader(fname));
-                                System.out.println("buffer br");
+                                
                                 String overrideFile = "";
-                                String currTimestamp = "dummy";
-                                System.out.println("enter do while");
-                                String logLine = br.readLine();
-                                String[] logEntry= logLine.split("\\t");
-                                currTimestamp = logEntry[0];
-                                ts1 = Timestamp.valueOf(currTimestamp);  
-                                while(prevTimestamp.compareTo(ts1) > 0)
-                                {
-                                    overrideFile = overrideFile + logLine + "\n";
-                                    System.out.println("checkpoint do while enter");
-                                    logLine = br.readLine();
-                                  //  System.out.println("checkpoint do while 1");
-                                    
-                                  //  System.out.println("checkpoint do while 2");                                    
-                                    logEntry= logLine.split("\\t");
-                                  //  System.out.println("checkpoint do while 3");
+                                if(checkpoint==true)
+                                {    
+                                    System.out.println("File fr");
+                                    BufferedReader br=new BufferedReader(new FileReader(fname));
+                                    System.out.println("buffer br");
+                                    String currTimestamp = "dummy";
+                                    System.out.println("enter do while");
+                                    String logLine = br.readLine();
+                                    String[] logEntry= logLine.split("\\t");
                                     currTimestamp = logEntry[0];
-                                   // System.out.println("checkpoint do while 4");
-                                    System.out.println(logEntry[0]+  " and " + logEntry[1]);
-                                  //  System.out.println("TimeStamp : "+currTimestamp);
                                     ts1 = Timestamp.valueOf(currTimestamp);  
-                                    
-                                    System.out.println("override : " + overrideFile);
-                                 
-                                    
-                                }
-                                br.close();
+                                    while(prevTimestamp.compareTo(ts1) > 0)
+                                    {
+                                        overrideFile = overrideFile + logLine + "\n";
+                                        System.out.println("checkpoint do while enter");
+                                        logLine = br.readLine();
+                                      //  System.out.println("checkpoint do while 1");
+
+                                      //  System.out.println("checkpoint do while 2");                                    
+                                        logEntry= logLine.split("\\t");
+                                      //  System.out.println("checkpoint do while 3");
+                                        currTimestamp = logEntry[0];
+                                       // System.out.println("checkpoint do while 4");
+                                        System.out.println(logEntry[0]+  " and " + logEntry[1]);
+                                      //  System.out.println("TimeStamp : "+currTimestamp);
+                                        ts1 = Timestamp.valueOf(currTimestamp);  
+
+                                        System.out.println("override : " + overrideFile);
+                                      
+
+                                    }
+                                    br.close();
+                                }    
+                                
                                // fr.close();
                                 FileWriter fw=new FileWriter(FileName+".txt");
                                 fw.write(overrideFile);
