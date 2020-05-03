@@ -19,6 +19,9 @@ import java.util.logging.Logger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
+
+import static recovery.Server.ClientMap;
 
 /**
  *
@@ -29,21 +32,22 @@ public class MultiClientHandler extends Thread
     final DataInputStream din;
     final DataOutputStream dout; 
     final Socket socket; 
-    final int ClientNumber;
-    final String FileName;
+    String ClientName;
+    //final String FileName;
     int ClientMoney;
     BufferedReader kboard_reader;
     Utilities util;
+    ClientDetails cd;
+    //String cname;
     
-    
-    MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout, int ClientCounter , String FileName)
+    MultiClientHandler(Socket socket , DataInputStream din , DataOutputStream dout)
     {
         this.din = din;
         this.dout = dout;
         this.socket = socket;
-        this.ClientNumber = ClientCounter;
-        this.FileName = FileName;
-        ClientMoney = 50000+ 10*ClientNumber;
+        //this.ClientName = ClientCounter;
+        //this.FileName = FileName;
+        //ClientMoney = 50000+ 10*ClientName;
         this.kboard_reader = new BufferedReader(new InputStreamReader(System.in));
         util = new Utilities();
             
@@ -51,16 +55,32 @@ public class MultiClientHandler extends Thread
     
     public String getMenu()
     {
-        return "1.Withdraw\n2.Deposit\n3.Send Log\n4.Exit\n";
+        return "1.Withdraw\n2.Deposit\n3.Send Log\n4.Notification\n5.Exit\n";
     }
 
+    String getNotification()
+    {
+
+    	String[] msgs = ClientMap.get(ClientName).checkNotification().split("|");
+    	System.out.println(ClientName + " - Notifications : ");
+    	String retval="\n";
+    	int i;
+    	// msg[0] is always blank that is why started  with 1.
+    	for(i =1;i<msgs.length;i++)
+        {
+    		System.out.print(msgs[i]);
+    		retval = retval + msgs[i];
+    	}
+    	return retval;
+    }
     
 
     
     public void run()
     {
         String Received; 
-        String ToReturn;
+        String username;
+        
         Timestamp ts1 = new Timestamp(System.currentTimeMillis());
         Timestamp prevTimestamp = new Timestamp(System.currentTimeMillis());
         
@@ -69,13 +89,38 @@ public class MultiClientHandler extends Thread
         try 
         {
             System.out.println(din);
-            Received = din.readUTF(); // s1
+            Received = din.readUTF(); // s1 //Username
+            ClientName = Received;
             
-            if(Received.equalsIgnoreCase("start"))  
+            String FileName = "s-Client_"+ ClientName + "_log.txt";
+            File NewFile = new File(FileName);
+            boolean IsCreated = NewFile.createNewFile();
+
+            if(IsCreated)
+            {
+                System.out.println("Successfully created new file, path:%s"+ NewFile.getCanonicalPath()); 
+            }
+            else
+            {
+                System.out.println("File Already Exists");
+            }
+
+            if(ClientMap.containsKey(ClientName) && ClientMap.get(ClientName).IsBlocked == false)
+            {
+                cd = ClientMap.get(ClientName);
+            }
+            else
+            {
+                cd = new ClientDetails( ClientName , 50000 , false );
+                ClientMap.put(ClientName , cd );
+            }
+            
+            
+            if(true)  
             {
                 while(true)
                 {    
-                    String FileName = "s-Client_"+ClientNumber+"_log";
+                    FileName = "s-Client_"+ClientName+"_log";
                     dout.writeUTF(getMenu());//s2
                     //System.out.println("Success");
                     rc =Integer.parseInt( din.readUTF() ); // Receive Option Chose by Client //s3
@@ -86,16 +131,16 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("Enter Amount you want to Withdraw"); //s4
                         Received = din.readUTF(); //s5
                         int WithdrawMoney = Integer.parseInt(Received);
-                        //System.out.println(ClientMoney);
+                        //System.out.println(cd.ClientMoney);
                         
-                        if( WithdrawMoney > 0 && WithdrawMoney <= ClientMoney )
+                        if( WithdrawMoney > 0 && WithdrawMoney <= cd.ClientMoney )
                         {
-                            ClientMoney -= WithdrawMoney;
+                            cd.ClientMoney -= WithdrawMoney;
                             dout.writeUTF("Amount has been succesfully withdrawn"+ WithdrawMoney); //s6
                             Timestamp ts = new Timestamp(System.currentTimeMillis());
                             String TimeStamp = ts.toString();
                             
-                            util.AddLogEntry( FileName +".txt", TimeStamp , "Debit" , WithdrawMoney ,ClientMoney );
+                            util.AddLogEntry( FileName +".txt", TimeStamp , "Debit" , WithdrawMoney ,cd.ClientMoney );
                         }
                         else
                         {
@@ -107,12 +152,12 @@ public class MultiClientHandler extends Thread
                         dout.writeUTF("Enter the Amount you want to Deposit"); //s4
                         Received = din.readUTF(); //s5
                         int DepositMoney = Integer.parseInt(Received);
-                        ClientMoney += DepositMoney;
+                        cd.ClientMoney += DepositMoney;
                         dout.writeUTF("Client has Deposited : "+ DepositMoney ); //s6
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         String TimeStamp = ts.toString();
                         
-                        util.AddLogEntry(FileName+".txt" ,  TimeStamp , "Credit" , DepositMoney , ClientMoney );
+                        util.AddLogEntry(FileName+".txt" ,  TimeStamp , "Credit" , DepositMoney , cd.ClientMoney );
                     }
                     else if( rc == 3 )
                     {
@@ -148,6 +193,8 @@ public class MultiClientHandler extends Thread
                                 //Recover all operations from log file, 
                                 //having Timestamp greater than last checkpoint
                                 //AlertOtherFunction();
+                                cd.IsBlocked = true;
+                                ClientMap.put(ClientName , cd);
                                 String fname= FileName+".txt";
                                 System.out.println(fname);
                                 //FileReader fr=
@@ -187,15 +234,29 @@ public class MultiClientHandler extends Thread
                                 fw.write(overrideFile);
                                 fw.close();
                                 System.out.println("Error");
+                                
+                                for(Map.Entry m:ClientMap.entrySet())
+                                {   
+                                         if (!m.getKey().equals(ClientName))
+                                         {
+                                                ClientMap.get(m.getKey()).Notify(ClientName + " has been blocked\n ");
+                                         }
+
+                                } 
                             }
                             File f = new File(FileName+"-temp.txt");
                             f.delete();
                         }
                         System.out.println("End of Log Function");
                     }
-                    else if(rc==4)
+                    else if(rc == 4)
                     {
-                        System.out.println("Client Number"+ClientNumber + " has Exited");
+                        String toSend = getNotification();
+                        dout.writeUTF(toSend);
+                    }
+                    else if(rc==5)
+                    {
+                        System.out.println("Client Number"+ClientName + " has Exited");
                         this.din.close(); 
                         this.dout.close(); 
                         break;

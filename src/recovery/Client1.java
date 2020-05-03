@@ -28,7 +28,7 @@ public class Client1
     
     String toSend , toReceive;
     Utilities util;
-    int ClientNumber;
+    String ClientName;
     
     
     Client1(String address , int port)
@@ -56,12 +56,14 @@ public class Client1
     
     private void ClientTask() throws IOException
     {
-        System.out.println("Enter 'Start'");
+        System.out.println("Enter UserName");
         toSend = kboard_reader.readLine();
-        dout.writeUTF(toSend); //c1 Start
+        dout.writeUTF(toSend); //c1 UserName
+        ClientName = toSend;
+        System.out.println("Welcome :"+ClientName);
         //System.out.println(din.readUTF()); //
         //String Menu = din.readUTF();
-        //ClientNumber = Integer.parseInt(din.readUTF());
+        //ClientName = Integer.parseInt(din.readUTF());
         //System.out.println("Success, You Are Client Nu");
         while(true)
         {
@@ -73,7 +75,7 @@ public class Client1
             {
                 //ReceiveLogFile("testfile.txt");
                 String fsize = din.readUTF();
-                String FileName = "c-Client_"+ClientNumber+"_Log.txt";
+                String FileName = "c-Client_"+ClientName+"_Log.txt";
                 util.SaveFile(FileName , din, Integer.parseInt(fsize));
                 System.out.println("Type 'over' to return the log file back to Server");
 
@@ -101,6 +103,11 @@ public class Client1
                 System.out.println(din.readUTF()); //c6
             }
             else if(toSend.equals("4"))
+            {
+                String Received = din.readUTF();
+                System.out.println(Received);
+            }
+            else if(toSend.equals("5"))
             {
                 break;
                 

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,12 +23,15 @@ import java.util.logging.Logger;
  */
 public class Server 
 {
+    static HashMap<String , ClientDetails>ClientMap = new HashMap<String, ClientDetails>();
+    
     private Socket socket = null;
     private ServerSocket server = null;
     private DataInputStream din = null;
     private DataOutputStream dout = null;
     private BufferedReader client_reader = null;
     private BufferedReader kboard_reader = null;
+    
     
     private Server(int port) throws Exception
     {
@@ -49,18 +53,7 @@ public class Server
                     System.out.println("New Connection established");
                     System.out.println(" >> " + "Client No:" + ClientCounter + " at" + socket.getInetAddress());
                     
-                    String FileName = "s-Client_"+ ClientCounter + "_log.txt";
-                    File NewFile = new File(FileName);
-                    boolean IsCreated = NewFile.createNewFile();
-                    
-                    if(IsCreated)
-                    {
-                        System.out.println("Successfully created new file, path:%s"+ NewFile.getCanonicalPath()); 
-                    }
-                    else
-                    {
-                        System.out.println("Some Error in Creation");
-                    }
+
                      
                     dout  = new DataOutputStream(socket.getOutputStream());  // to send data to the client
                     client_reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // to read data coming from the client 
@@ -68,7 +61,7 @@ public class Server
                     kboard_reader = new BufferedReader( new InputStreamReader(System.in)); 
                     
                     //System.out.println("Hello");
-                    Thread t = new MultiClientHandler( socket, din , dout , ClientCounter , FileName );
+                    Thread t = new MultiClientHandler( socket, din , dout );
                     t.start();
                 }
             }
